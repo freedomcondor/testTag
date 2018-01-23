@@ -1,0 +1,88 @@
+updated by Jan 23, 2018
+
+This is a simple testbench of using lua to calc 3D location of apriltags from its 2D projection in
+the images, and detect and tracking blocks.
+
+we run this on ubuntu 16.04 LTS, with lua5.2 and OpenCV 3.0.0, 
+   other versions are untested, you can have a try
+#####################################################################################
+Brief Introduction
+
+to run this test, you should have these libraries
+	1. Lua
+	2. OpenCV
+
+The structure of the code is like this:
+
+main.cpp   <----|  testbench  <----- lua
+
+main.cpp calls init(), step() and close() functions in testbench
+
+the testbench loads images one by one from images in data sets
+		  and loads 2D apriltags datas from .dat file
+	      and then call lua to calculate the pos of the tags.
+		  After calling lua, it retrieve the results and draw them on images.
+
+######################################################################################
+
+Folders and Files
+
+There are 3 folders really matters, which are : testbench, lua, data
+
+1. data folder contains 4 data sets, which are "exp-10-failed", "exp-11-passed",
+												"exp-13-passed" and "exp-16-passed",
+	For each set, there are: 
+		a folder, containing all the images of a video,
+	 	a .txt file, containing the names of all the images
+	 	a .dat file, containing the 2D information of all apriltags in every image 
+			information include: center and corners of the 2D positions in the image
+	we provide this .dat file so that you do not need an apriltag library to detect tags to 
+	run this testbench.
+
+2. testbench: There are main.cpp, testbench.h and testbench.cpp in testbench folder.
+	main.cpp includes testbench.h, and testbench calls lua
+
+3. lua: There are a lot of things in lua folder, but not everything is useful for this testbench
+	testbench functions will call a function named "func" in func.lua 
+	and func.lua will call calcPos.lua and tracking.lua
+
+	"calTagPos" function in calcPos.lua will call solveSqu/solveSquare.lua, which is the core 
+	algorithm which calc the 3D location of a tag from its 2D projection in the image.
+
+	In lua folder, additional to lua, there is also a solvepnp folder containing a lua wrap on 
+	opencv's solvepnp function so that opencv can be tested to compare. 
+
+	tracking.lua contains some trick after locating Tags, to detect blocks and tracking them. It
+	is not so important here.
+
+#####################################################################################
+
+Compile and run
+
+  Compile:
+	Go to root folder, where there is a CMakeLists, and do typical cmake-make thing:
+	Create a build folder, go inside and run cmake to generate a Makefile, and make, this will
+	generate a executable file:
+		
+	commands:
+		testTag$ mkdir build
+		testTag$ cd build
+		testTag/build$ cmake ..
+		testTag/build$ make
+  Run:
+  	To run, simply run the executable file:
+		./luaTag
+
+3. OpenCV
+    If you want to use solvepnp function in opencv to compare, go to folder lua/solvepnp, 
+	build, cmake and make, generate a libsolvepnp.so in the build folder. It will be used by lua.
+    
+###################################################################################
+SolveSqu:
+
+The core function (the solveSquare(), who calculate the location and rotation of a tag) is located in 
+	lua/solveSqu/solveSqu.lua
+There is also another file called solveSqu_dynamic.lua, which also works. it uses matrix library to dynamically
+solve linear equations, while solveSqu.lua uses static formula which is fixed in the code. To switch between these
+two, change the require in lua/calcPos.lua Line 2 and 3
+###################################################################################
