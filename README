@@ -39,6 +39,8 @@ There are 3 folders really matters, which are : testbench, lua, data
 	we provide this .dat file so that you do not need an apriltag library to detect tags to 
 	run this testbench.
 
+	to switch between data sets, go to testbench.cpp Line 77 and Line 87
+
 2. testbench: There are main.cpp, testbench.h and testbench.cpp in testbench folder.
 	main.cpp includes testbench.h, and testbench calls lua
 
@@ -80,7 +82,7 @@ Compile and run
 ###################################################################################
 SolveSqu:
 
-The core function (the solveSquare(), who calculate the location and rotation of a tag) is located in 
+The core function (the solveSquare(), who calculate the position and rotation of a tag) is located in 
 	lua/solveSqu/solveSqu.lua
 There is also another file called solveSqu_dynamic.lua, which also works. it uses matrix library to dynamically
 solve linear equations, while solveSqu.lua uses static formula which is fixed in the code. To switch between these
