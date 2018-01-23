@@ -1,4 +1,4 @@
-updated by Jan 23, 2018
+updated by Jan 23, 2018, written by Weixu ZHU
 
 This is a simple testbench of using lua to calc 3D location of apriltags from its 2D projection in
 the images, and detect and tracking blocks.

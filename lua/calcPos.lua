@@ -19,13 +19,6 @@ function calTagPos(tag)
 		--				2 = {x = xx, y = xx}
 		--			}
 
-									--[[ check corners
-										for i = 1,4 do
-											print("\t\ttagcorner",i,"x = ",tag.corners[i].x,
-																	"y = ",tag.corners[i].y) 
-										end
-									--]]
-
 	tag.corners.halfL = tag.halfL;
 	--res_cv = libsolvepnp.solvepnp(tag.corners)
 									--print("before solve")
@@ -42,14 +35,6 @@ function calTagPos(tag)
 							cam_para,
 							dis_para
 						)
-							--{883.9614,883.9614,319.5000,179.5000},		-- ku kv u0 v0
-							--{0.018433,0.16727,0,0,-1.548088})			-- distort para
-
-							--{939.001439,939.001439,320,240},		-- ku kv u0 v0       -- camera
-							--{-0.4117914,5.17498964,0,0,-17.7026842})			-- distort para
-							--{0,0,0,0,0})			-- distort para
-
-									--print("after solve")
 
 		--[[
 			for libsolvepnp

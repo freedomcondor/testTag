@@ -80,29 +80,11 @@ function func(tags_seeing)
 		}
 	--]]
 
-
-									--[[ -- for testing tagList
-										print(a.timestamp)
-										print(a.n)
-										for i = 1, a.n do
-											print("\ttag ",i,":")
-											print("\tcenter.x",a[i].center.x)
-											print("\tcenter.y",a[i].center.y)
-											for j = 1,4 do
-												print("\t\tcorner ",j,":")
-												print("\t\tx",a[i].corners[j].x)
-												print("\t\ty",a[i].corners[j].y)
-											end
-										end
-									--]]
 		-- expected unit is meter
 
 	-- Calc position of tags ------------------------------------
-	--print("tagList got:",tagList.n,"tags")
 
 	for i = 1, tags_seeing.n do
-									--print("\tfor the",i,"tag")
-
 		tags_seeing[i].halfL = halfTag
 		tags_seeing[i].camera_flag = tags_seeing.camera_flag
 									--print("before calc")
@@ -114,25 +96,18 @@ function func(tags_seeing)
 				--	translation = {x=,y=,z=} <a vector> the position of the the tag
 				--	quaternion = {x,y,z,w} <a quaternion> the quaternion rotation of the tag
 				-- }
-									--print("length",pos[i].translation:len())
-									--print("translation:",pos[i].translation)
-									--print("rotation:",pos[i].rotation)
 		tags_seeing[i].rotation = pos.rotation
 		tags_seeing[i].translation = pos.translation
 		tags_seeing[i].quaternion = pos.quaternion
 	end
-									--print("before tracking")
 	trackingTags(tags,tags_seeing)
-									--print("after tracking")
 
 	-- Calc postion of boxes ----------------------------------
-									--print("before boxes")
 									print("-----------------------------")
 	tags.halfBox = halfBox
 	local boxes_seeing = calcBoxPos(tags)
 	trackingBoxes(boxes,boxes_seeing)
 									print("after boxes, n = ",boxes.n)
-									--print("boxes n : ",boxes.n)
 	--[[
 		boxes has
 		{
@@ -151,13 +126,11 @@ function func(tags_seeing)
 	--]]
 
 	-- Calc structure ?
-									--print("before structures")
 									print("-----------------------------")
 	boxes_seeing.halfBox = halfBox
 	boxes.halfBox = halfBox
 	--local structures_seeing = calcStructure(boxes_seeing) 
 	local structures_seeing = calcStructure(boxes) 
-									--print("after structures")
 									print("structures n : ",structures_seeing.n)
 								for i = 1, boxes.n do
 									print("box",boxes[i].label,"its scale = ",boxes[i].groupscale)
