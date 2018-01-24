@@ -14,6 +14,10 @@ to run this test, you should have these libraries
 	1. Lua
 	2. OpenCV
 
+	If you do not have lua, sudo apt-get install lua5.2 should work
+	if you do not have OpenCV, see:
+	https://docs.opencv.org/3.0-beta/doc/tutorials/introduction/linux_install/linux_install.html
+
 The structure of the code is like this:
 
 main.cpp   <----|  testbench  <----- lua
