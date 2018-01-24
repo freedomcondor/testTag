@@ -1,3 +1,0 @@
-/home/harry/testTag/build/CMakeFiles/edit_cache.dir
-/home/harry/testTag/build/CMakeFiles/rebuild_cache.dir
-/home/harry/testTag/build/CMakeFiles/luaTag.dir
