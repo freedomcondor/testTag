@@ -1,10 +1,11 @@
 updated by Jan 23, 2018, written by Weixu ZHU
 
-This is a simple testbench of using lua to calc 3D location of apriltags from its 2D projection in
-the images, and detect and tracking blocks.
+This is a simple testbench for calculating the 3D pose of apriltags from its 2D projection in
+the images.
 the algorithm is described in detail in the .pdf file
+https://github.com/freedomcondor/testTag/blob/master/solution-april-tag.pdf
 
-we run this on ubuntu 16.04 LTS, with lua5.2 and OpenCV 3.0.0, 
+we tested this on ubuntu 16.04 LTS, with lua5.2 and OpenCV 3.0.0, 
    other versions are untested, you can have a try
 #####################################################################################
 Brief Introduction
@@ -20,7 +21,7 @@ main.cpp   <----|  testbench  <----- lua
 main.cpp calls init(), step() and close() functions in testbench
 
 the testbench loads images one by one from images in data sets
-		  and loads 2D apriltags datas from .dat file
+		  and loads apriltags data sets of 2D coordinates from .dat file
 	      and then call lua to calculate the pos of the tags.
 		  After calling lua, it retrieve the results and draw them on images.
 
@@ -28,35 +29,31 @@ the testbench loads images one by one from images in data sets
 
 Folders and Files
 
-There are 3 folders really matters, which are : testbench, lua, data
+There are 3 folders : testbench, lua, data
 
-1. data folder contains 4 data sets, which are "exp-10-failed", "exp-11-passed",
-												"exp-13-passed" and "exp-16-passed",
-	For each set, there are: 
+1. data folder a data set, which a video taken by a robot
+   there are: 
 		a folder, containing all the images of a video,
 	 	a .txt file, containing the names of all the images
 	 	a .dat file, containing the 2D information of all apriltags in every image 
-			information include: center and corners of the 2D positions in the image
-	we provide this .dat file so that you do not need an apriltag library to detect tags to 
-	run this testbench.
-
-	to switch between data sets, go to testbench.cpp Line 77 and Line 87
+			information includes: the center and corner locations of the 2D positions in the 
+			image as a .dat file so that you do not need an apriltag library installed to detect 
+			tags when running this testbench.
 
 2. testbench: There are main.cpp, testbench.h and testbench.cpp in testbench folder.
 	main.cpp includes testbench.h, and testbench calls lua
 
-3. lua: There are a lot of things in lua folder, but not everything is useful for this testbench
+3. lua: There are a lot of things in lua folder 
 	testbench functions will call a function named "func" in func.lua 
 	and func.lua will call calcPos.lua and tracking.lua
 
 	"calTagPos" function in calcPos.lua will call solveSqu/solveSquare.lua, which is the core 
 	algorithm which calc the 3D location of a tag from its 2D projection in the image.
 
-	In lua folder, additional to lua, there is also a solvepnp folder containing a lua wrap on 
-	opencv's solvepnp function so that opencv can be tested to compare. 
+	In lua folder, additional to lua, there is also a solvepnp folder containing a lua wrapper on 
+	opencv's solvepnp function so that opencv's method can be compared. 
 
-	tracking.lua contains some trick after locating Tags, to detect blocks and tracking them. It
-	is not so important here.
+	tracking.lua is not relevant here, it is used to track blocks after locating.
 
 #####################################################################################
 
@@ -85,7 +82,5 @@ SolveSqu:
 
 The core function (the solveSquare(), who calculate the position and rotation of a tag) is located in 
 	lua/solveSqu/solveSqu.lua
-There is also another file called solveSqu_dynamic.lua, which also works. it uses matrix library to dynamically
-solve linear equations, while solveSqu.lua uses static formula which is fixed in the code. To switch between these
-two, change the require in lua/calcPos.lua Line 2 and 3
+
 ###################################################################################

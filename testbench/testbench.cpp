@@ -68,22 +68,10 @@ int testbench_init(int SystemWeight, int SystemHeight)
 
 	/////////////////	Open Pic name list ////////////////
 		// contains the names of the pictures 
-	/*
-	namelist = fopen("../data/exp-10-failed.txt","r");
-	namelist = fopen("../data/exp-11-passed.txt","r");
-	namelist = fopen("../data/exp-13-passed.txt","r");
-	namelist = fopen("../data/exp-16-passed.txt","r");
-	*/
 	namelist = fopen("../data/exp-16-passed.txt","r");
 	if (namelist == NULL) 
 		{printf("open file namelist failed\n"); return -1;}
 
-	/*
-	datalist = fopen("../data/exp-10-failed.dat","r");
-	datalist = fopen("../data/exp-11-passed.dat","r");
-	datalist = fopen("../data/exp-13-passed.dat","r");
-	datalist = fopen("../data/exp-16-passed.dat","r");
-	*/
 	datalist = fopen("../data/exp-16-passed.dat","r");
 	if (datalist == NULL) 
 		{printf("open file datalist failed\n"); return -1;}
