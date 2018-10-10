@@ -1,4 +1,10 @@
-updated by Jan 23, 2018, written by Weixu ZHU
+#------------------------------------------------------
+ZHU Weixu
+	zhuweixu_harry@126.com
+
+updated by 10 Oct 2018, fixed some problems after real robot test
+#------------------------------------------------------
+
 
 This is a simple testbench for calculating the 3D pose of apriltags from its 2D projection in
 the images.
