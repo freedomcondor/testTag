@@ -169,7 +169,6 @@ function Hungarian:create(configuration)
 			end
 		end
 	end
-	--print("i = ",i) -- output nil -- proof that i is local to for
 
 	return instance
 end
@@ -188,9 +187,6 @@ function Hungarian:update_labels()
 			delta = slack[y]
 		end
 	end
-
-										--debug------------------
-										--print("delta = ",delta)
 
 	-- update delta change
 	for x = 1,N do
@@ -282,42 +278,21 @@ function Hungarian:aug()
 
 	-----Start to find------------------------------------
 
-										--------debug---------------
-										--print("start to find,root is",root)
-										--io.read()
-
 	local edgex = nil		-- used for record the edge if a good path is found
 	local edgey = nil
 	local flag = 0	--flag = 1 mean found a good path
 	while true do
-
-										--------debug---------------
-										--print("queue is Empty",queue:isEmpty())
-										--io.read()
-
 		-- search every x in queue
 		while queue:isEmpty() == false do
 			x = queue:read()
-										--------debug---------------
-										--print("focal x",x)
-										--io.read()
 			-- for this new x, search all its edges
 			flag = 0	--flag = 1 mean found a good path
 			for y = 1,N do
-										--------debug---------------
-										--print("focal y",y)
-										--io.read()
 				-- search y, find a edge of equality between this new x and a new y (not in T)
 				if self.costMat[x][y] == self.lx[x] + self.ly[y] and T[y] ~= true then
 					-- don't write T[y] == false, because T[y] == nil initially
-										--------debug---------------
-										--print("focal y is equal")
-										--io.read()
 					-- check is this y assigned? if not means a good path found
 					if self.match_of_Y[y] == nil then 
-										--------debug---------------
-										--print("a path found")
-										--io.read()
 						edgex = x; edgey = y
 						flag = 1; break 
 					end  
@@ -336,8 +311,6 @@ function Hungarian:aug()
 				-- else next x in queue
 		end	-- end of queue searching (while queue:isEmpty)
 
-										--------debug---------------
-										--print("test")
 		if flag == 1 then break end
 			-- a good path found jump out of this x searching
 			-- else means we have searched every x in S
@@ -346,30 +319,6 @@ function Hungarian:aug()
 		
 		self:update_labels()
 	
-										------debug------------------
-										--[[
-										---self:add_to_tree(2,1)
-										--self:add_to_tree(3,1)
-										print("parent_table:")	
-										for x = 1,N do
-											print(parent_table[x])	
-										end
-
-										print("slack_table:")	
-										for x = 1,N do
-											print(slack[x])	
-										end
-
-										print("lx_table:")	
-										for x = 1,N do
-											print(self.lx[x])	
-										end
-										print("ly_table:")	
-										for y = 1,N do
-											print(self.ly[y])	
-										end
-										--]]
-										----------------------------
 		queue = nil; queue = Queue:create()
 		flag = 0
 		for y = 1,N do
@@ -377,11 +326,6 @@ function Hungarian:aug()
 				-- means a new equal edge is found, a new Y
 				if self.match_of_Y[y] == nil then
 					-- this Y is single, record and break
-										-----------------------------
-										--print("new edge found after changing label")
-										--io.read()
-										-----------------------------
-
 					x = slackx[y]
 					flag = 1
 					edgex = x; edgey = y
@@ -403,12 +347,6 @@ function Hungarian:aug()
 
 	if flag == 1 then  -- a good path
 		self.maxMatch = self.maxMatch + 1
-
-										----------------------------
-										--print("edgex edgey = ",edgex,edgey)
-										--io.read()
-
-		------ change the path -------
 		local px = edgex
 		local py = edgey
 		local temp
@@ -419,19 +357,6 @@ function Hungarian:aug()
 			py = temp
 			px = parent_table[px]
 		end
-		-------------------------------
-										----debug-------------------------
-										--[[
-										print("match table X")
-										for x = 1,N do
-											print(self.match_of_X[x])	
-										end
-										print("match table Y")
-										for y = 1,N do
-											print(self.match_of_Y[y])	
-										end
-										--]]
-										----------------------------------
 		self:aug()
 	end
 

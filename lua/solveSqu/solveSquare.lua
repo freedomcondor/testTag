@@ -1,3 +1,13 @@
+------------------------------------------------------------------------
+-- 	Weixu ZHU (Harry)
+-- 		zhuweixu_harry@126.com
+-- 	Version : 1.1
+-- 		fixed: make it right hand all the time
+-- 	Version : 1.2
+-- 		fixed: 	1. add comments on counter-clock
+-- 				2. fixed abc, pqr origin vector
+-- 				3. dir pointing inside
+------------------------------------------------------------------------
 Vec = require("Vector")
 Vec3 = require("Vector3")
 --Mat = require("Matrix")
@@ -11,12 +21,12 @@ function solveSquare(_uv,_L,camera,distort)
 		uv[2] = {x = **, y = **}
 		uv[3] = {x = **, y = **}
 		uv[4] = {x = **, y = **}
+		is 4 corners in counter-clock order
 
 		L is a number to the side
 
 		camera is a Matrix3/Matrix, or a {ku,kv,u0,v0}
 	--]]
-
 	---------------------- prepare -----------------------------
 	local ku,kv,u0,v0
 	local L = _L 
@@ -40,9 +50,6 @@ function solveSquare(_uv,_L,camera,distort)
 		return nil
 	end
 		--get ku,kv,u0,v0
-	--[[
-	print("ku = ",ku); print("kv = ",kv); print("u0 = ",u0); print("v0 = ",v0);
-	--]]
 
 	---------------------- undistort -----------------------------
 	-- get uv from _uv
@@ -66,15 +73,7 @@ function solveSquare(_uv,_L,camera,distort)
 		return nil
 	end
 
-	--[[ --print check
-		for i = 1,4 do
-			print("uv[",i,"]: x= ",uv[i].x,"y=",uv[i].y)
-		end
-	--]]
-
 	-- undistort
-		-- to be filled
-	--if distort ~= nil then
 	if type(distort) == "table" then
 		local K1,K2,K3,K4,K5,K6,p,q
 		K1 = distort[1] or 0
@@ -95,14 +94,13 @@ function solveSquare(_uv,_L,camera,distort)
 					(1 +  (K1 + (K2 + (K3) * r2) * r2) * r2)
 			tx = tx * DIS
 			ty = ty * DIS
-			--print("DIS = ",DIS)
 			uv[i].x = tx * ku + u0
 			uv[i].y = ty * kv + v0
 		end
 	end
 		-- undistort get new uv, new camera
 		-- solveSquare(newuv,L,newcamera)
-
+		
 	-------------------- after undistort -----------------------
 	-- get u1v1 to u4v4 from undistorted uv
 	local u1,v1,u2,v2,u3,v3,u4,v4
@@ -129,20 +127,15 @@ function solveSquare(_uv,_L,camera,distort)
 	u1 = u1 or 1; v1 = v1 or 1; u2 = u2 or 1; v2 = v2 or 1;
 	u3 = u3 or 1; v3 = v3 or 1; u4 = u4 or 1; v4 = v4 or 1;
 
-	--[[ print check
-	print("ku = ",ku); print("kv = ",kv); print("u0 = ",u0); print("v0 = ",v0);
-	print("u1 = ",u1); print("v1 = ",v1); print("u2 = ",u2); print("v2 = ",v2);
-	print("u3 = ",u3); print("v3 = ",v3); print("u4 = ",u4); print("v4 = ",v4);
-	--]]
-
 	-- now we have ku kv u0 v0, and ux(1-4) vx(1-4), and L 
 	----------------------------------------------------------
 	-- trick starts
-
+	
 	-------------------------------------------------------------------------------------
 	-- solve linar equation statically--------------------------------------------------
 		-- to express all in c r z
-		-- all left hand
+		-- all right hand
+		-- for a counter-clock uv input, abc points up, pqr points right
 
 	local c0 = -(u1*v2 - u2*v1 - u1*v3 + u3*v1 + u2*v4 - u4*v2 - u3*v4 + u4*v3)/
 		    (u1*v2 - u2*v1 - u1*v4 + u2*v3 - u3*v2 + u4*v1 + u3*v4 - u4*v3)
@@ -243,11 +236,9 @@ function solveSquare(_uv,_L,camera,distort)
 	f2 = f3-f4
 
 	local cz,rz
-												--print("before solving quad equations")
 	cz,rz = solveQuad(	a1,b1,c1,d1,e1,f1,
 						a2,b2,c2,d2,e2,f2,
 						0.0000000001,c0,r0)
-												--print("after solving quad equations")
 
 	--- if failed
 	if cz == nil or rz == nil then
@@ -282,49 +273,22 @@ function solveSquare(_uv,_L,camera,distort)
 	q = qc * c + qr * r + qz * z
 
 	-- got x y z a b c p q r
-	-- left hand before
 	--------------------------------------
-	-- right hand below
-	local loc = Vec3:create(-x,y,z)
-	local abc = Vec3:create(-a,b,c)
-	local pqr = Vec3:create(-p,q,r)
+	-- right hand all the time
+	local loc = Vec3:create(x,y,z)
+	local abc = Vec3:create(a,b,c)
+	local pqr = Vec3:create(p,q,r)
 	local dir = abc * pqr		
-
-	--[[ some thing wrong
-		-- dir is supposed to point outside the tags/boxes
-	if dir.z > 0 then
-		local temp = abc
-		abc = pqr
-		pqr = temp
-	end
-	dir = abc * pqr
-	--]]
-
-	dir = dir:nor()
+	dir = dir:nor()		-- pointing inside
 
 	--- Calc Quaternion
 	abc = abc:nor()
 	pqr = pqr:nor()
-	local abc_o = Vec3:create(0,-1,0)
+	local abc_o = Vec3:create(0,1,0)
 	local pqr_o = Vec3:create(1,0,0)
 
-	--[[
-	local axis = (abc - abc_o) * (pqr - pqr_o)
-	axis = axis:nor()
-
-	local rot_o = abc_o - axis ^ abc * axis
-	local rot_d = abc - axis ^ abc * axis
-	rot_o = rot_o:nor()
-	rot_d = rot_d:nor()
-	local cos = rot_o ^ rot_d
-	axis = rot_o * rot_d
-	local th = math.acos(cos)
-	--]]
-
-	--local quater = Qua:createFromRotation(axis,th)
 	local quater = Qua:createFrom4Vecs(abc_o,pqr_o,abc,pqr)
 	--- quaternion got ----------------
-	-----------------------------------
 	
 	return {translation = loc, rotation = dir, quaternion = quater}
 end

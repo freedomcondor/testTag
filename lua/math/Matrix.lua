@@ -1,13 +1,18 @@
+--------------------------------------------------------------------
+--	Weixu ZHU (Harry)
+--		zhuweixu_harry@126.com
+--	Version: 1.1
+--		fixed: Matrix link
+--		added: Matrix reverse
+--------------------------------------------------------------------
 Vec = require("Vector")
 local Matrix = {CLASS = "Matrix"}
 Matrix.__index = Matrix
 
 function Matrix:create(x,y,z)
-										--print("create begin")
 	local instance = {}
 	setmetatable(instance, self)
 	self.__index = self
-										--print("create after set")
 
 		--the metatable of instance would be whoever owns this create
 			--so you can :  a = State:create();  b = a:create();  grandfather-father-son
@@ -24,7 +29,6 @@ function Matrix:create(x,y,z)
 
 	-- (<a matrix>)
 	if type(x) == "table" and x.CLASS == "Matrix" then
-										print("create in table copy")
 		instance.n = x.n	
 		instance.m = x.m
 		for i = 1,instance.n do
@@ -33,7 +37,6 @@ function Matrix:create(x,y,z)
 				instance[i][j] = x[i][j] or 0
 			end
 		end
-										print("create before return")
 		return instance
 	end
 
@@ -254,15 +257,12 @@ end
 function Matrix:addVec(x,y,z)
 	if 	type(x) == "table" and x.CLASS == "Vector" and 
 		type(y) == "number" then
-										print("addvec before create")
 		local c = Matrix:create(self)
-										print("addvec after create")
 		if z == "column" or z == "col" then
 			c = c:T()
 			c = c:addVec(x,y)
 			c = c:T()
 		else
-										print("add vec not col")
 			if x.n == self.m and y <= self.n then
 				for i = 1, x.n do
 					c[y][i] = c[y][i] + x[i]
@@ -271,7 +271,6 @@ function Matrix:addVec(x,y,z)
 				print("Matrix addVec: makes no sense")
 				return nil
 			end
-										print("addvec after add")
 		end
 		return c
 	end
@@ -344,7 +343,9 @@ function Matrix:exchange(x,y,z)
 	return c
 end
 
--- link Matrix   A:link(B) = A|B
+-- link Matrix   A:link(B,"col") = A|B
+-- 				 A:link(B) = A
+-- 				 			 B
 function Matrix:link(y,z)
 	local temp
 	if z == "column" or z == "col" then
@@ -370,7 +371,7 @@ function Matrix:link(y,z)
 		end
 	else
 		temp = self:T()
-		local c = temp:link(y,"column")
+		local c = temp:link(y:T(),"column")
 		return c:T()
 	end
 	print("Matrix link : makes no sense code 2")
@@ -415,13 +416,11 @@ function Matrix:triangle()
 		-- stop at the min of m and n
 			--if n > m, we should still stop at row m, not row n
 	
-										print("tri before set exc")
 	local excMark = Mat:create(self.n,1)
 	for i = 1, self.n do excMark[i][1] = i end
 
 	local success = true
 
-										print("tri before for")
 	for i = 1, n do
 		local flag = 1
 		--if (c[i][i] == 0) then
@@ -438,14 +437,10 @@ function Matrix:triangle()
 				end
 			end
 		end
-										print("tri before takeVec")
 		v = c:takeVec(i)
-										print("tri after takeVec")
 		if (flag == 1) then
 			for j = i+1, c.n do
-										print("tri before addVec",c[i][i],(c[j][i] / c[i][i]))
 				c = c:addVec(-v * (c[j][i] / c[i][i]),j)
-										print("tri after addVec")
 			end
 		else
 			success = false
@@ -453,7 +448,7 @@ function Matrix:triangle()
 		--print("tri check, step",i,":",c)
 	end
 
-										print("tri before return",success)
+	--print(success)
 	return c, excMark:takeVec(1,"col"), success
 end
 
@@ -477,18 +472,12 @@ function Matrix:diagonal()
 	-- should have a para to indicate threshold for almostZero 
 		--triangle(thres)
 		--	almostZero(xx,thres)
-									print("before triangle")
 	local c,excMark,success = self:triangle()
-									print("after triangle")
 	local v
 	local n
 
-									print("before set exc")
 	local exctemp = Mat:create(self.n,1)
 	excMark = exctemp:addVector(excMark,1,"col")
-
-									print("after set exc")
-
 
 	if c.m > c.n then n = c.n
 				 else n = c.m end
@@ -506,7 +495,6 @@ function Matrix:diagonal()
 			end
 		end
 	end
-									print("calc after return")
 	return c,excMark:takeVector(1,"col"),success
 end
 
@@ -522,9 +510,40 @@ function Matrix:determinant()
 	return A
 end
 
+function Matrix:unit()
+	local c = Mat:create(self.n, self.m)
+	local n = self.n
+	if self.n > self.m then n = self.m end
+	for i = 1, n do
+		c[i][i] = 1
+	end
+	return c
+end
+
+function Matrix:reverse()
+	if self.n ~= self.m then
+		print("Matrix reverse make no sense!")
+		return 0
+	end
+	local c = self:link(self:unit(),"col")
+	c = c:diagonal()
+	for i = 1, c.n do
+		local temp = c[i][i]
+		for j = 1, c.m do
+			c[i][j] = c[i][j] / temp
+		end
+	end
+	local d = Matrix:create(c.n,c.n)
+	for i = 1, c.n do
+		for j = 1, c.n do
+			d[i][j] = c[i][j + c.n]
+		end
+	end
+	return d
+end
+
 ---------------------------------------  TO DO
 -- to be filled:
--- function reverse
 -- function A*
 -----------------------------------------------
 function Matrix:__tostring()

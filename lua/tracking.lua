@@ -1,3 +1,11 @@
+----------------------------------------------------------------------------
+--
+-- Weixu ZHU (Harry)
+-- 	zhuweixu_harry@126.com
+-- Version: 1.1
+-- 			fixed : copied cubeDir when tracking boxes
+--
+----------------------------------------------------------------------------
 Mat = require("Matrix")
 Hungarian = require("hungarian")
 -----------------------------------------------------------------------------
@@ -6,9 +14,6 @@ Hungarian = require("hungarian")
 function trackingTags(tags,tags_seeing,_threshold)
 	local threshold = _threshold or 200 -- the unit should be pixel
 	local inf = 999999999
-	--[[
-		{n, 1 2 3 4}
-	--]]
 
 	local maxN
 	if tags.n > tags_seeing.n then
@@ -17,17 +22,14 @@ function trackingTags(tags,tags_seeing,_threshold)
 		maxN = tags_seeing.n
 	end
 
-	--if maxN == 0 then return nil end
-
-	--local C = Mat:create(tags.n,tags_seeing.n)
 	local C = Mat:create(maxN,maxN)
 		-- filled with 0s
 	--[[
 					tags_seeing.n
-		 		* * * * * * * * * * * 
-		tags.n 	*					*
-			 	*					*
-		 		* * * * * * * * * * * 
+				* * * * * * * * * * * 
+				*					*	tags.n
+				*					*
+				* * * * * * * * * * * 
 	--]]
 
 	-- set penalty matrix
@@ -58,22 +60,11 @@ function trackingTags(tags,tags_seeing,_threshold)
 		end
 	end
 
-												--print("before set hung")
 	local hun = Hungarian:create{costMat = C,MAXorMIN = "MIN"}
 	hun:aug()
-												--print("after calc hung")
-												print(C)
-
-												---[[
-														print("match table X")
-														for x = 1,hun.N do
-															print("\t",hun.match_of_X[x])
-														end
-												--]]
 
 	local i = 1
 	while i <= tags.n do
-	--for i = 1, tags.n do
 		-- match existing tags
 		-- may have a match
 		-- may lost it
@@ -82,7 +73,7 @@ function trackingTags(tags,tags_seeing,_threshold)
 			-- lost
 			if tags[i].tracking == "lost" then
 				tags[i].lostcount = tags[i].lostcount + 1
-				if tags[i].lostcount >= 1 then
+				if tags[i].lostcount >= 0 then
 					tags[i].tracking = "abandon"
 				end
 			else
@@ -156,7 +147,7 @@ function trackingTags(tags,tags_seeing,_threshold)
 		end
 	end
 
-													---[[
+													--[[
 														print("tags.n",tags.n)
 														i = 1; local count = 1
 														while count <= tags.n do
@@ -169,7 +160,6 @@ function trackingTags(tags,tags_seeing,_threshold)
 															i = i + 1
 														end
 													--]]
-
 end
 
 -----------------------------------------------------------------------------
@@ -177,19 +167,6 @@ end
 -----------------------------------------------------------------------------
 
 function trackingBoxes(boxes,boxes_seeing)
-														---[[
-														print("entering bracking box boxes.n",boxes.n)
-														print("boxes_seeing.n",boxes_seeing.n)
-														for i = 1, boxes.n do
-															print("boxes.label",boxes[i].label)
-															print("boxes.tracking",boxes[i].tracking)
-															print("nTags",boxes[i].nTags)
-															for j = 1, boxes[i].nTags do
-																print(j,boxes[i][j].tracking)
-															end
-														end
-														print("----------")
-														--]]
 	i = 1
 	while i <= boxes.n do
 	--for i = 1, boxes.n do
@@ -197,7 +174,6 @@ function trackingBoxes(boxes,boxes_seeing)
 		j = 1
 		while j <= boxes[i].nTags do
 			if boxes[i][j].tracking == "abandon" then
-														print("abandoning")
 				boxes[i][j] = nil
 				boxes[i][j] = boxes[i][boxes[i].nTags]
 				boxes[i][boxes[i].nTags] = nil
@@ -206,11 +182,9 @@ function trackingBoxes(boxes,boxes_seeing)
 			end
 			j = j + 1
 		end
-
 		if boxes[i].nTags == 0 then
 			boxes[i].tracking = "abandon"
 		end
-
 		-- match
 		local flag = 0
 		for j = 1, boxes[i].nTags do
@@ -219,14 +193,12 @@ function trackingBoxes(boxes,boxes_seeing)
 					boxes[i].tracking = "abandon"
 					break
 				end
-														--print("a matching tag")
 				local tempbox = boxes[i][j].box
 				tempbox.assigned = true
-				--boxes[i] = boxes_seeing[boxes[i][j].boxj]
-					-- maybe copy boxes[i][j].box to boxes[i]
 				boxes[i].translation = boxes[i][j].box.translation
 				boxes[i].rotation = boxes[i][j].box.rotation
 				boxes[i].quaternion = boxes[i][j].box.quaternion
+				boxes[i].cubeDir = boxes[i][j].box.cubeDir
 
 				--keep lost tags
 				local lostkeep = {n = 0}
@@ -259,17 +231,6 @@ function trackingBoxes(boxes,boxes_seeing)
 		if flag == 0 and boxes[i].tracking ~= "abandon" then
 			-- means there are tags but all tags are lost
 			boxes[i].tracking = "lost"
-			--[[
-			if boxes[i].tracking == "lost" then
-				boxes[i].lostcount = boxes[i].lostcount + 1
-				if boxes[i].lostcount >= 1 then
-					boxes[i].tracking = "abandon"
-				end
-			else
-				boxes[i].tracking = "lost"
-				boxes[i].lostcount = 0
-			end
-			--]]
 		end
 
 		if boxes[i].tracking == "abandon" then
@@ -286,16 +247,14 @@ function trackingBoxes(boxes,boxes_seeing)
 
 	for i = 1, boxes_seeing.n do
 		if boxes_seeing[i].assigned == nil then
-			print("new")
 			-- new box
 			boxes.n = boxes.n + 1
 
-			-- copy too
-			--boxes[boxes.n] = boxes_seeing[i]
 			boxes[boxes.n] = {}
 			boxes[boxes.n].translation = boxes_seeing[i].translation
 			boxes[boxes.n].rotation = boxes_seeing[i].rotation
 			boxes[boxes.n].quaternion = boxes_seeing[i].quaternion
+			boxes[boxes.n].cubeDir = boxes_seeing[i].cubeDir
 
 			boxes[boxes.n].nTags = boxes_seeing[i].nTags
 			for k = 1, boxes_seeing[i].nTags do
@@ -312,7 +271,7 @@ function trackingBoxes(boxes,boxes_seeing)
 			boxes.label[k] = true
 		end
 	end
-													---[[
+													--[[
 														print("boxes.n",boxes.n)
 														i = 1; local count = 1
 														while count <= boxes.n do

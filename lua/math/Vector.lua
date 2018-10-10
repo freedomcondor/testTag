@@ -92,12 +92,10 @@ function Vector.__mul(a,b)
 		return c
 	end
 	if type(b) == "number" then
-										print("in Vec multi before")
 		local c = Vector:create(a.n)
 		for i = 1,a.n do
 			c[i] = a[i] * b
 		end
-										print("in Vec multi after")
 		return c
 	end
 	if type(a) == "number" then

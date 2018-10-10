@@ -238,7 +238,7 @@ int draw()
 		if (label[j] % 3 == 2) strcpy(colour,"blue");
 		// draw 3D point, using boxes_pos and tags_pos
 		// left and right hand using opencv
-		TranslationVector = cv::Matx31d( -tags_pos[j][3], tags_pos[j][4], tags_pos[j][5]);
+		TranslationVector = cv::Matx31d( tags_pos[j][3], tags_pos[j][4], tags_pos[j][5]);
 		qx = tags_pos[j][6];
 		qy = tags_pos[j][7];
 		qz = tags_pos[j][8];
@@ -253,7 +253,7 @@ int draw()
 		axisx = axisx / rotationscale;
 		axisy = axisy / rotationscale;
 		axisz = axisz / rotationscale;
-		RotationVector = cv::Matx31d( axisx, -axisy, -axisz);
+		RotationVector = cv::Matx31d( axisx, axisy, axisz);
 
 		cv::projectPoints(	m_vecOriginPts,
 							RotationVector,
@@ -290,7 +290,7 @@ int draw()
 		if (label[j] % 3 == 2) strcpy(colour,"blue");
 		// draw 3D point, using boxes_pos and boxes_pos
 		// left and right hand using opencv
-		TranslationVector = cv::Matx31d( -boxes_pos[j][3], boxes_pos[j][4], boxes_pos[j][5]);
+		TranslationVector = cv::Matx31d( boxes_pos[j][3], boxes_pos[j][4], boxes_pos[j][5]);
 		qx = boxes_pos[j][6];
 		qy = boxes_pos[j][7];
 		qz = boxes_pos[j][8];
@@ -306,7 +306,7 @@ int draw()
 		axisy = axisy / rotationscale;
 		axisz = axisz / rotationscale;
 
-		RotationVector = cv::Matx31d( axisx, -axisy, -axisz);
+		RotationVector = cv::Matx31d( axisx, axisy, axisz);
 
 		cv::projectPoints(	m_vecOriginPts_box,
 							RotationVector,
